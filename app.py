@@ -140,8 +140,9 @@ def load_artifacts():
     return model, impute_vals
 
 try:
-    model, impute_vals = load_artifacts()
-    model_loaded = True
+model, impute_vals = load_artifacts()
+# TEMPORARY DEBUG:
+st.write("Model expects these columns:", model.feature_names_in_)
 except:
     model_loaded = False
 
@@ -150,28 +151,28 @@ except:
 # ============================================================
 def preprocess(df, impute_vals):
     df = df.copy()
-    
-    # Handle zeros in cholesterol
     df['serumcholestrol'] = df['serumcholestrol'].replace(0, np.nan)
     
-    # Fill Medians
     for col in MEDIAN_COLS:
         if col in df.columns:
-            fill_val = impute_vals.get(col, df[col].median())
-            df[col] = df[col].fillna(fill_val)
+            val = impute_vals.get(col, df[col].median())
+            df[col] = df[col].fillna(val) # Removed inplace=True
             
-    # Fill Modes
     for col in MODE_COLS:
         if col in df.columns:
-            fill_val = impute_vals.get(col, df[col].mode()[0])
-            df[col] = df[col].fillna(fill_val).astype(int)
+            val = impute_vals.get(col, df[col].mode()[0])
+            df[col] = df[col].fillna(val).astype(int)
             
-    # CRITICAL: Ensure the order matches the training data exactly
-    return df[FEATURE_COLS]
+    return df # Return the whole DF, then filter by feature_names_in_ in the predict function
 
 def predict_single(data_dict):
-    df   = pd.DataFrame([data_dict])
+    df = pd.DataFrame([data_dict])
     df_p = preprocess(df, impute_vals)
+    
+    # FIX: Reorder columns to match the model's training order exactly
+    if hasattr(model, 'feature_names_in_'):
+        df_p = df_p[model.feature_names_in_]
+    
     prob = model.predict_proba(df_p)[0][1]
     pred = int(prob >= 0.5)
     return pred, prob
