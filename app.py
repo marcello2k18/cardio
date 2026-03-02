@@ -150,14 +150,23 @@ except:
 # ============================================================
 def preprocess(df, impute_vals):
     df = df.copy()
+    
+    # Handle zeros in cholesterol
     df['serumcholestrol'] = df['serumcholestrol'].replace(0, np.nan)
+    
+    # Fill Medians
     for col in MEDIAN_COLS:
         if col in df.columns:
-            df[col].fillna(impute_vals.get(col, df[col].median()), inplace=True)
+            fill_val = impute_vals.get(col, df[col].median())
+            df[col] = df[col].fillna(fill_val)
+            
+    # Fill Modes
     for col in MODE_COLS:
         if col in df.columns:
-            df[col].fillna(impute_vals.get(col, df[col].mode()[0]), inplace=True)
-            df[col] = df[col].astype(int)
+            fill_val = impute_vals.get(col, df[col].mode()[0])
+            df[col] = df[col].fillna(fill_val).astype(int)
+            
+    # CRITICAL: Ensure the order matches the training data exactly
     return df[FEATURE_COLS]
 
 def predict_single(data_dict):
