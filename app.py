@@ -120,15 +120,15 @@ h1, h2, h3 { font-family: 'DM Serif Display', serif; }
 """, unsafe_allow_html=True)
 
 # ============================================================
-# Constants
+# Constants — 7 selected features only
 # ============================================================
 FEATURE_COLS = [
-    'age', 'gender', 'chestpain', 'restingBP', 'serumcholestrol',
-    'fastingbloodsugar', 'restingrelectro', 'maxheartrate',
-    'exerciseangia', 'oldpeak', 'noofmajorvessels'
+    'chestpain', 'restingBP', 'gender',
+    'maxheartrate', 'serumcholestrol',
+    'fastingbloodsugar', 'age'
 ]
-MEDIAN_COLS = ['restingBP', 'serumcholestrol', 'maxheartrate', 'oldpeak']
-MODE_COLS   = ['chestpain', 'restingrelectro']
+MEDIAN_COLS = ['restingBP', 'serumcholestrol', 'maxheartrate']
+MODE_COLS   = ['chestpain']
 
 # ============================================================
 # Load Artifacts
@@ -203,21 +203,22 @@ with tab1:
     c1, c2 = st.columns(2)
     with c1:
         age               = st.number_input("Age", 1, 100, 50)
-        gender            = st.selectbox("Gender", [1, 0], format_func=lambda x: "Male" if x == 1 else "Female")
+        gender            = st.selectbox("Gender", [1, 0],
+                                format_func=lambda x: "Male" if x == 1 else "Female")
         chestpain         = st.selectbox("Chest Pain Type", [0,1,2,3],
-                                format_func=lambda x: {0:"Typical Angina",1:"Atypical Angina",2:"Non-Anginal",3:"Asymptomatic"}[x])
+                                format_func=lambda x: {
+                                    0:"Typical Angina",
+                                    1:"Atypical Angina",
+                                    2:"Non-Anginal",
+                                    3:"Asymptomatic"
+                                }[x])
         restingBP         = st.number_input("Resting Blood Pressure (mmHg)", 50, 250, 120)
-        serumcholestrol   = st.number_input("Serum Cholesterol (mg/dl)", 0, 700, 200)
-        fastingbloodsugar = st.selectbox("Fasting Blood Sugar > 120", [0,1],
-                                format_func=lambda x: "Yes" if x == 1 else "No")
+
     with c2:
-        restingrelectro  = st.selectbox("Resting ECG", [0,1,2],
-                                format_func=lambda x: {0:"Normal",1:"ST-T Abnormality",2:"LV Hypertrophy"}[x])
-        maxheartrate     = st.number_input("Max Heart Rate", 60, 220, 150)
-        exerciseangia    = st.selectbox("Exercise Induced Angina", [0,1],
+        serumcholestrol   = st.number_input("Serum Cholesterol (mg/dl)", 0, 700, 200)
+        fastingbloodsugar = st.selectbox("Fasting Blood Sugar > 120 mg/dl", [0, 1],
                                 format_func=lambda x: "Yes" if x == 1 else "No")
-        oldpeak          = st.number_input("Oldpeak (ST Depression)", 0.0, 10.0, 1.0, step=0.1)
-        noofmajorvessels = st.selectbox("No. of Major Vessels", [0,1,2,3])
+        maxheartrate      = st.number_input("Max Heart Rate Achieved", 60, 220, 150)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -225,9 +226,7 @@ with tab1:
         pred, prob = predict_single({
             'age': age, 'gender': gender, 'chestpain': chestpain,
             'restingBP': restingBP, 'serumcholestrol': serumcholestrol,
-            'fastingbloodsugar': fastingbloodsugar, 'restingrelectro': restingrelectro,
-            'maxheartrate': maxheartrate, 'exerciseangia': exerciseangia,
-            'oldpeak': oldpeak, 'noofmajorvessels': noofmajorvessels
+            'fastingbloodsugar': fastingbloodsugar, 'maxheartrate': maxheartrate
         })
 
         if pred == 1:
@@ -254,6 +253,7 @@ with tab2:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.markdown("<p class='section-label'>Upload Patient Data</p>", unsafe_allow_html=True)
     st.markdown("<p style='color:#555; font-size:0.85rem;'>Supported: CSV, Excel (.xlsx)</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='color:#444; font-size:0.8rem;'>Required columns: {', '.join(FEATURE_COLS)}</p>", unsafe_allow_html=True)
 
     uploaded = st.file_uploader("", type=['csv', 'xlsx'], label_visibility="collapsed")
 
