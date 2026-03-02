@@ -137,13 +137,14 @@ MODE_COLS   = ['chestpain']
 def load_artifacts():
     model = joblib.load('best_model.pkl')
     impute_vals = joblib.load('impute_vals.pkl')
-    return model, impute_vals
+    selected_features = joblib.load('selected_features.pkl')
+    return model, impute_vals, selected_features
+
+model, impute_vals, FEATURE_COLS = load_artifacts()
 
 # Gunakan blok try-except dengan indentasi yang benar
 try:
     model, impute_vals = load_artifacts()
-    # Ini untuk mengecek nama kolom yang benar di Streamlit
-    st.sidebar.write("Model features:", model.feature_names_in_) 
     model_loaded = True
 except Exception as e:
     st.error(f"Error loading model: {e}")
@@ -181,7 +182,10 @@ def predict_single(data_dict):
     return pred, prob
 
 def predict_batch(df):
-    df_p  = preprocess(df, impute_vals)
+    df_p = preprocess(df, impute_vals)
+    # TAMBAHKAN ini:
+    if hasattr(model, 'feature_names_in_'):
+        df_p = df_p[model.feature_names_in_]
     probs = model.predict_proba(df_p)[:, 1]
     preds = (probs >= 0.5).astype(int)
     return preds, probs
