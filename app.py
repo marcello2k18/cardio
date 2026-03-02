@@ -142,9 +142,8 @@ def load_artifacts():
 
 model, impute_vals, FEATURE_COLS = load_artifacts()
 
-# Gunakan blok try-except dengan indentasi yang benar
 try:
-    model, impute_vals = load_artifacts()
+    model, impute_vals, FEATURE_COLS = load_artifacts()
     model_loaded = True
 except Exception as e:
     st.error(f"Error loading model: {e}")
