@@ -135,15 +135,18 @@ MODE_COLS   = ['chestpain']
 # ============================================================
 @st.cache_resource
 def load_artifacts():
-    model       = joblib.load('best_model.pkl')
+    model = joblib.load('best_model.pkl')
     impute_vals = joblib.load('impute_vals.pkl')
     return model, impute_vals
 
+# Gunakan blok try-except dengan indentasi yang benar
 try:
-model, impute_vals = load_artifacts()
-# TEMPORARY DEBUG:
-st.write("Model expects these columns:", model.feature_names_in_)
-except:
+    model, impute_vals = load_artifacts()
+    # Ini untuk mengecek nama kolom yang benar di Streamlit
+    st.sidebar.write("Model features:", model.feature_names_in_) 
+    model_loaded = True
+except Exception as e:
+    st.error(f"Error loading model: {e}")
     model_loaded = False
 
 # ============================================================
